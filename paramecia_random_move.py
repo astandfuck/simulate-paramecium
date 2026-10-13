@@ -3,7 +3,7 @@ import core.Paramecium as P
 
 
 def main():
-    environment = E.Environment()
+    environment = E.Environment(food_num = 20)
     paramecium = P.Paramecium(environment, p_num = 10)
 
     def setup(_environment: E.Environment):
@@ -20,7 +20,7 @@ def main():
     def special(click_y,click_x):
         paramecium.update_click(click_y,click_x)
 
-    E.start(environment, setup, loop, special, fps = 60)
+    E.start(environment, setup, loop, special, click_obj = 1, fps = 60)
 
 if __name__ == '__main__':
     main()

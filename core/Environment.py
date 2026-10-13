@@ -93,13 +93,13 @@ class Environment:
         y,x = core_spot
         for i in range(-1,2) :            #-1,0,1(y)
             for j in range(-1,2) :         #-1,0,1(x)
-                if 0<=x+j<self.width and 0<=y+i<self.height :
-                    sum_values+= self.env_values[y+i][x+j]
+                if 0 <= x+j< self.width and 0 <= y+i < self.height :
+                    sum_values += self.env_values[y+i][x+j]
         end_values = sum_values/9
         for i in range(-1,2) :
             for j in range(-1,2) :
-                if 0<=x+j<self.width and 0<=y+i<self.height :#!!!!!can be promoted
-                    if self.env[y+i][x+j] == 0 :
+                if 0 <= x+j < self.width and 0 <= y+i <self.height :#!!!!!can be promoted
+                    if self.env[y+i][x+j] != 1 :
                         self.env_values[y+i][x+j] = end_values
 
     def spread(self, radius:int = 20)->None:
@@ -143,7 +143,7 @@ class Environment:
                     self.env_values[row][col] = self.max_values
                     self.food_position.append((row,col))
 #%%
-def start(_environment: Environment, _set_up, _loop, _special, fps = 10):
+def start(_environment: Environment, _set_up, _loop, _special = None, click_obj = 1, fps = 10):
 
     last_add_time = 0.0
 
@@ -203,11 +203,11 @@ def start(_environment: Environment, _set_up, _loop, _special, fps = 10):
                 # print(click_x,click_y)
                 if click_y >= 0 and click_x < _environment.width and click_x >= 0 and click_y < _environment.height :
                     if _environment.env[click_y][click_x] == 0 or _environment.env[click_y][click_x] == 2:
-                        switch = 2
+                        switch = click_obj
                         if switch == 1:
                             _environment.env[click_y][click_x] = 1  #此处可以决定生成食物
                             _environment.update_values()
-                        elif switch == 2:
+                        elif switch == 9:
                             _environment.env[click_y][click_x] = 9  #此处可以决定生成草履虫
                             _special(click_y, click_x)
 
