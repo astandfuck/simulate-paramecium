@@ -35,21 +35,21 @@ class Environment:
     env的值含义：
     1：食物
     2：障碍物
-    3：草履虫
+    9：草履虫
     """
-    def __init__(self, food_num:int = 10, max_values:float = 1000.0, _env:list = None, _env_values:list = None, width:int = 250, height:int = 250):
+    def __init__(self, food_num:int = 10, max_values:float = 1000.0, env:list = None, env_values:list = None, width:int = 250, height:int = 250):
         """
         env和self.env的地址一样，所以操作self.env也会同样改变env
         """
-        if _env_values is None:
+        if env_values is None:
             self.env_values = [[0 for _ in range(width)]for _ in range(height)]
         else:
-            self.env_values = _env_values
+            self.env_values = env_values
 
-        if _env is None:
+        if env is None:
             self.env = [[0 for _ in range(width)]for _ in range(height)]
         else:
-            self.env = _env
+            self.env = env
 
         self.width = width
         self.height = height
@@ -104,7 +104,7 @@ class Environment:
 
     def spread(self, radius:int = 20)->None:
         """
-        radius是各个食物点传播化学信息的矩形范围半径，以radius范围传播化学信息，更改self._env_values的值（call env_values_9_9）
+        radius是各个食物点传播化学信息的矩形范围半径，以radius范围传播化学信息，更改self.env_values的值（call env_values_9_9）
         """
         for food_spot in self.food_position :
             self.env_values_9_9(food_spot)
@@ -137,18 +137,19 @@ class Environment:
         """
         更新,由env中新添加的食物,所提供的化学信息env_values
         """
+        self.food_position.clear()
         for row in range(self.height):
             for col in range(self.width):
                 if self.env[row][col] == 1:
                     self.env_values[row][col] = self.max_values
                     self.food_position.append((row,col))
 #%%
-def start(_environment: Environment, _set_up, _loop, _special = None, click_obj = 1, fps = 10):
+def start(environment: Environment, _set_up, _loop, _special = None, click_obj = 1, fps = 10):
 
     last_add_time = 0.0
 
     pygame.init()
-    screen = pygame.display.set_mode((_environment.width * SCALE, _environment.height * SCALE))
+    screen = pygame.display.set_mode((environment.width * SCALE, environment.height * SCALE))
     pygame.display.set_caption("simulate paramecium")
     clock = pygame.time.Clock()
 
@@ -156,7 +157,7 @@ def start(_environment: Environment, _set_up, _loop, _special = None, click_obj 
     draw_1 = True
     pygame.key.set_repeat(200,50)
 
-    _set_up(_environment)
+    _set_up(environment)
 
     while running :
         current_time = pygame.time.get_ticks()
@@ -192,44 +193,43 @@ def start(_environment: Environment, _set_up, _loop, _special = None, click_obj 
                 for dy in range(-GENERATE_RADIUS,GENERATE_RADIUS+1):
                     new_x = press_x//SCALE + dx
                     new_y = press_y//SCALE + dy
-                    if new_y >= 0 and new_x < _environment.width and new_x >= 0 and new_y < _environment.height :
-                        if _environment.env[new_y][new_x] != 9 :
-                            _environment.env[new_y][new_x] = 1
+                    if new_y >= 0 and new_x < environment.width and new_x >= 0 and new_y < environment.height :
+                        if environment.env[new_y][new_x] != 9 :
+                            environment.env[new_y][new_x] = 1
         if food_click_list :#生成点击的食物点
             for click_x_y in food_click_list:
                 click_x,click_y = click_x_y
                 click_x = click_x//SCALE
                 click_y = click_y//SCALE
                 # print(click_x,click_y)
-                if click_y >= 0 and click_x < _environment.width and click_x >= 0 and click_y < _environment.height :
-                    if _environment.env[click_y][click_x] == 0 or _environment.env[click_y][click_x] == 2:
+                if click_y >= 0 and click_x < environment.width and click_x >= 0 and click_y < environment.height :
+                    if environment.env[click_y][click_x] == 0 or environment.env[click_y][click_x] == 2:
                         switch = click_obj
                         if switch == 1:
-                            _environment.env[click_y][click_x] = 1  #此处可以决定生成食物
-                            _environment.update_values()
+                            environment.env[click_y][click_x] = 1  #此处可以决定生成食物
+                            environment.update_values()
                         elif switch == 9:
-                            _environment.env[click_y][click_x] = 9  #此处可以决定生成草履虫
+                            environment.env[click_y][click_x] = 9  #此处可以决定生成草履虫
                             _special(click_y, click_x)
-
         food_click_list.clear()
 
-        _loop(_environment)
+        _loop(environment)
 
         # screen.fill(COLOR_EMPTY)
         if draw_1 :
-            _environment.draw_environment(screen)
+            environment.draw_environment(screen)
         else :
-            _environment.draw_values(screen)
+            environment.draw_values(screen)
         pygame.display.update()
 
     pygame.quit()
     sys.exit()
 #%%
-def setup(_environment: Environment):
-    _environment.generate_food()
+def setup(environment: Environment):
+    environment.generate_food()
 #%%
-def loop(_environment: Environment):
-    _environment.spread()
+def loop(environment: Environment):
+    environment.spread()
 #%%
 def main():
     environment = Environment()

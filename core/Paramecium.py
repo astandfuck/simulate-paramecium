@@ -23,21 +23,21 @@ class Paramecium:
         在special中传入start函数，用于记录在鼠标点击位生成的草履虫，
         更新在parameciums字典中（记录为最后的编号+1）
         """
-        self.paramecia.update({len(self.paramecia)+1 : [(click_y,click_x), None, 0]})
+        self.paramecia.update({len(self.paramecia)+1 : [(click_y,click_x), [0,0,0,0,0,0,0,0], 0]})
 
     def generate_paramecium(self):
         """
         在environment.width与environment.height范围中，
         随机挑选env为空（=0）的位置生成草履虫（=9），
         并将位置坐标（y，x）保存在parameciums字典中，
-        ！！！ 这里首次创建了parameciums字典对应的键值对，值为 [(y,x), None, 0]
+        ！！！ 这里首次创建了parameciums字典对应的键值对，值为 [(y,x), [0,0,0,0,0,0,0,0], 0]
         """
         for num in range(1, self.p_num+1):
             x = random.randint(0, self.environment.width-1)
             y = random.randint(0, self.environment.height-1)
             if self.env[y][x] == 0 :
                 self.env[y][x] = 9
-                self.paramecia[num] = [(y,x), None, 0]
+                self.paramecia[num] = [(y,x), [0,0,0,0,0,0,0,0], 0]
 
     def sense_value(self):
         """
