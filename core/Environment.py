@@ -2,6 +2,8 @@
 import sys 
 import pygame 
 import random
+from typing import Literal
+from name import FOOD, OBSTACLE, PARAMECIUM
 #%%
 #窗口大小和比例SCALE
 # WIDTH = 250
@@ -64,11 +66,11 @@ class Environment:
         for y in range(self.height):
             for x in range(self.width):
                 # 根据格子值选择颜色
-                if self.env[y][x] == 1:
+                if self.env[y][x] == FOOD:
                     color = COLOR_FOOD
-                elif self.env[y][x] == 2:
+                elif self.env[y][x] == OBSTACLE:
                     color = COLOR_OBSTACLE
-                elif self.env[y][x] == 9:
+                elif self.env[y][x] == PARAMECIUM:
                     color = COLOR_PARAMECIUM
                 else:
                     color = COLOR_EMPTY
@@ -99,7 +101,7 @@ class Environment:
         for i in range(-1,2) :
             for j in range(-1,2) :
                 if 0 <= x+j < self.width and 0 <= y+i <self.height :#!!!!!can be promoted
-                    if self.env[y+i][x+j] != 1 :
+                    if self.env[y+i][x+j] != FOOD :
                         self.env_values[y+i][x+j] = end_values
 
     def spread(self, radius:int = 20)->None:
@@ -116,7 +118,7 @@ class Environment:
                             cx = x+dx_
                             cy = y+dy_
                             if 0 <= cx < self.width and 0 <= cy < self.height :
-                                if self.env[cy][cx] == 0 or self.env[cy][cx] == 1:  #只将食物和空格的坐标传入9_9扩散器！！！！！！！！！
+                                if self.env[cy][cx] == 0 or self.env[cy][cx] == FOOD:  #只将食物和空格的坐标传入9_9扩散器！！！！！！！！！
                                     self.env_values_9_9((cy, cx))
 
     def generate_food(self):
@@ -128,7 +130,7 @@ class Environment:
                 x=random.randint(0,self.width-1)
                 y=random.randint(0,self.height-1)
                 if self.env[y][x] == 0 :
-                    self.env[y][x] = 1
+                    self.env[y][x] = FOOD
                     self.env_values[y][x] = self.max_values
                     self.food_position.append((y,x))
                     break
@@ -140,11 +142,11 @@ class Environment:
         self.food_position.clear()
         for row in range(self.height):
             for col in range(self.width):
-                if self.env[row][col] == 1:
+                if self.env[row][col] == FOOD:
                     self.env_values[row][col] = self.max_values
                     self.food_position.append((row,col))
 #%%
-def start(environment: Environment, _set_up, _loop, _special = None, click_obj = 1, fps = 10):
+def start(environment: Environment, set_up, loop, special = None, click_obj: Literal[FOOD,PARAMECIUM] = FOOD, fps = 10):
 
     last_add_time = 0.0
 
@@ -156,9 +158,7 @@ def start(environment: Environment, _set_up, _loop, _special = None, click_obj =
     running = True
     draw_1 = True
     pygame.key.set_repeat(200,50)
-
-    _set_up(environment)
-
+    set_up(environment)  #----------------------------
     while running :
         current_time = pygame.time.get_ticks()
         clock.tick(fps)#帧数
@@ -166,21 +166,15 @@ def start(environment: Environment, _set_up, _loop, _special = None, click_obj =
         for event in pygame.event.get() :
             if event.type == pygame.QUIT :
                 running = False
-
             if event.type == pygame.KEYDOWN :#
                 if event.key == pygame.K_q :
                     if draw_1 is True :
                         draw_1 = False
                     else :
                         draw_1 = True
-            # if event.type == pygame.MOUSEBUTTONDOWN :
-            #     click_x,click_y = event.pos
-            #     food_click_list.append((click_x,click_y))
         if keys[pygame.K_ESCAPE] :
             running = False
-
         #------------------------------------^^---此上为基本的运行设置，有按键作用、帧数等
-
         left_pressed = pygame.mouse.get_pressed()[0]
         right_pressed = pygame.mouse.get_pressed()[2]
         if left_pressed and current_time - last_add_time > add_delay :#左键长按生产单个食物
@@ -194,8 +188,8 @@ def start(environment: Environment, _set_up, _loop, _special = None, click_obj =
                     new_x = press_x//SCALE + dx
                     new_y = press_y//SCALE + dy
                     if new_y >= 0 and new_x < environment.width and new_x >= 0 and new_y < environment.height :
-                        if environment.env[new_y][new_x] != 9 :
-                            environment.env[new_y][new_x] = 1
+                        if environment.env[new_y][new_x] != PARAMECIUM :
+                            environment.env[new_y][new_x] = FOOD
         if food_click_list :#生成点击的食物点
             for click_x_y in food_click_list:
                 click_x,click_y = click_x_y
@@ -205,23 +199,20 @@ def start(environment: Environment, _set_up, _loop, _special = None, click_obj =
                 if click_y >= 0 and click_x < environment.width and click_x >= 0 and click_y < environment.height :
                     if environment.env[click_y][click_x] == 0 or environment.env[click_y][click_x] == 2:
                         switch = click_obj
-                        if switch == 1:
-                            environment.env[click_y][click_x] = 1  #此处可以决定生成食物
+                        if switch == FOOD:
+                            environment.env[click_y][click_x] = FOOD  #此处可以决定生成食物
                             environment.update_values()
-                        elif switch == 9:
-                            environment.env[click_y][click_x] = 9  #此处可以决定生成草履虫
-                            _special(click_y, click_x)
+                        elif switch == PARAMECIUM:
+                            environment.env[click_y][click_x] = PARAMECIUM  #此处可以决定生成草履虫
+                            special(click_y, click_x)  #----------------------------
         food_click_list.clear()
-
-        _loop(environment)
-
+        loop(environment)  #----------------------------
         # screen.fill(COLOR_EMPTY)
         if draw_1 :
             environment.draw_environment(screen)
         else :
             environment.draw_values(screen)
         pygame.display.update()
-
     pygame.quit()
     sys.exit()
 #%%

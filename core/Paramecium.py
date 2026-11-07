@@ -1,5 +1,6 @@
 import core.Environment as E
 import random
+from name import FOOD, OBSTACLE, PARAMECIUM, COORD, ENV_VALUES, FOOD_VALUES
 
 class Paramecium:
     def __init__(self, environment, p_num = 10):
@@ -16,7 +17,7 @@ class Paramecium:
         """
         for i in range(1, len(self.paramecia)+1):
             print(i, ': ', self.paramecia[i])
-        print()
+        print('\n')
 
     def update_click(self, click_y, click_x):
         """
@@ -36,7 +37,7 @@ class Paramecium:
             x = random.randint(0, self.environment.width-1)
             y = random.randint(0, self.environment.height-1)
             if self.env[y][x] == 0 :
-                self.env[y][x] = 9
+                self.env[y][x] = PARAMECIUM
                 self.paramecia[num] = [(y,x), [0,0,0,0,0,0,0,0], 0]
 
     def sense_value(self):
@@ -46,7 +47,7 @@ class Paramecium:
         这个属性存储在parameciums字典值的第二位
         """
         for num in range(1, len(self.paramecia) + 1):
-            y, x = self.paramecia[num][0]
+            y, x = self.paramecia[num][COORD]
             list_values = []
             for dy in [-1, 0, 1]:
                 for dx in [-1, 0, 1]:
@@ -55,7 +56,7 @@ class Paramecium:
                         new_x = x + dx
                         if 0 <= new_y < self.environment.height and 0 <= new_x < self.environment.width :
                             list_values.append(self.env_values[new_y][new_x])
-            self.paramecia[num][1] = tuple(list_values)
+            self.paramecia[num][ENV_VALUES] = tuple(list_values)
 
     def move_randomly(self):
         """
@@ -64,21 +65,21 @@ class Paramecium:
         原位变为空
         """
         for num in range(1, len(self.paramecia) + 1):
-            y, x = self.paramecia[num][0]
+            y, x = self.paramecia[num][COORD]
             new_y = y + random.choice([-1, 0, 1])
             new_x = x + random.choice([-1, 0, 1])
             if new_y == y and new_x == x:
                 continue
             if 0 <= new_x < self.environment.width and 0 <= new_y < self.environment.height :
-                if self.env[new_y][new_x] == 1 :  #新位置是食物
-                    self.env[new_y][new_x] = 9  #新位置变为草履虫
-                    self.env[y][x] = 2  #旧位置变为空
-                    self.paramecia[num][0] = (new_y, new_x)  #草履虫的位置记录改变
-                    self.paramecia[num][2] += 1 #记录吃到的食物数加1
+                if self.env[new_y][new_x] == FOOD :  #新位置是食物
+                    self.env[new_y][new_x] = PARAMECIUM  #新位置变为草履虫
+                    self.env[y][x] = 0  #旧位置变为空------------可以改为OBSTACLE，显示草履虫轨迹（前提是OBSTACLE没有什么特殊交互）
+                    self.paramecia[num][COORD] = (new_y, new_x)  #草履虫的位置记录改变
+                    self.paramecia[num][FOOD_VALUES] += 1 #记录吃到的食物数加1
                 else:
-                    self.env[new_y][new_x] = 9
-                    self.env[y][x] = 2
-                    self.paramecia[num][0] = (new_y, new_x)
+                    self.env[new_y][new_x] = PARAMECIUM
+                    self.env[y][x] = 0  ##旧位置变为空------------可以改为OBSTACLE，显示草履虫轨迹（前提是OBSTACLE没有什么特殊交互）
+                    self.paramecia[num][COORD] = (new_y, new_x)
 
 
 if __name__ == '__main__':
